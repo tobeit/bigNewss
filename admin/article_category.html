@@ -26,43 +26,14 @@
             <th class="text-center" width="100">操作</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="category">
+          <!-- 1文章分类列表 -->
           <tr>
             <td>未分类</td>
             <td>uncategorized</td>
             <td class="text-center">
               <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
               <a href="javascript:deleteTr( 1 );" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-
-          <tr>
-            <td>奇趣事</td>
-            <td>funny</td>
-            <td class="text-center">
-              <a href="javascript:editTr({&quot;id&quot;:&quot;2&quot;,&quot;slug&quot;:&quot;funny&quot;,&quot;name&quot;:&quot;奇趣事&quot;});"
-                class="btn btn-info btn-xs">编辑</a>
-              <a href="javascript:deleteTr( 2 );" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-
-          <tr>
-            <td>会生活</td>
-            <td>living</td>
-            <td class="text-center">
-              <a href="javascript:editTr({&quot;id&quot;:&quot;3&quot;,&quot;slug&quot;:&quot;living&quot;,&quot;name&quot;:&quot;会生活&quot;});"
-                class="btn btn-info btn-xs">编辑</a>
-              <a href="javascript:deleteTr( 3 );" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-
-          <tr>
-            <td>爱旅行</td>
-            <td>travel</td>
-            <td class="text-center">
-              <a href="javascript:editTr({&quot;id&quot;:&quot;4&quot;,&quot;slug&quot;:&quot;travel&quot;,&quot;name&quot;:&quot;爱旅行&quot;});"
-                class="btn btn-info btn-xs">编辑</a>
-              <a href="javascript:deleteTr( 4 );" class="btn btn-danger btn-xs">删除</a>
             </td>
           </tr>
         </tbody>
@@ -86,7 +57,7 @@
           <h4 class="modal-title">新增分类</h4>
         </div>
         <div class="modal-body">
-          <form>
+          <form id="categoryAdd">
             <!-- 用一个文本框来保存当前编辑的 分类id -->
             <!-- <input type="text" style="display: none" name="" id="recipient-id"> -->
             <!-- 隐藏域 特性:默认就是隐藏的 -->
@@ -112,6 +83,26 @@
   <script src="js/jquery-1.12.4.min.js"></script>
   <script src="js/bootstrap/js/bootstrap.min.js"></script>
   <script src="./js/template-web.js"></script>
+
+<!-- template模板开始 -->
+    <!-- 1.文章分类列表模板 -->
+  <script type="text/html" id="categoryTpl">
+    {{each data}}
+    <tr>
+        <td>{{$value.name}}</td>
+        <td>{{$value.slug}}</td>
+        <td class="text-center">
+          <a href="javascript:;"
+            class="btn btn-info btn-xs edit" data-id="{{$value.id}}">编辑</a>
+          <a href="javascript:;" class="btn btn-danger btn-xs delete" data-id="{{$value.id}}">删除</a>
+        </td>
+      </tr>
+    {{/each}}
+  </script>
+
+
+<!-- template模板结束 -->
+
   <script>
     $('#addModal').modal({
       show: false,
@@ -122,10 +113,76 @@
       $('#addModal').modal('hide');
     });
   </script>
+  
+
+
 
   <!-- 业务逻辑代码 -->
   <script>
-    
+    $(function(){
+      // 1. 获取并渲染分类列表
+      $.ajax({
+        url:'http://47.111.184.55:8888/api/v1/admin/category/list',
+        type:'get',
+        success:function(data){
+          //获取参数 渲染到页面
+          var html = template('categoryTpl',data);
+          $('#category').html(html);
+        }
+      });
+
+      //2.点击’新增分类‘按钮  添加 文章类别
+      $('#model_add').on('click',function(){
+        //获取参数
+        var params = $('#categoryAdd').serialize();
+        //发送ajax请求
+        $.ajax({
+          url: 'http://47.111.184.55:8888/api/v1/admin/category/add',
+          type: 'post',
+          data: params,
+          success: function(data){
+            //添加成功后 重新加载页面
+            location.reload();
+          }
+        });
+      });
+
+      //3 点击 删除文章类别 
+      $('#category').on('click','.delete',function(){
+        var id = $(this).attr('data-id');
+        console.log(id)
+        if(confirm('确认要删除此项吗')){
+          //发送ajax请求
+          $.ajax({
+            url: 'http://47.111.184.55:8888/api/v1/admin/category/delete',
+            type: 'post',
+            data: {id:id},
+            success: function(data){
+              //添加成功后 重新加载页面
+              location.reload();
+            }
+          });
+        }
+      });
+
+      //4.点击 编辑文章类别
+      $('#category').on('click','.edit',function(){
+        var id = $(this).attr('data-id');
+        console.log(id)
+        //发送ajax请求
+        $.ajax({
+          url: 'http://47.111.184.55:8888/api/v1/admin/category/delete',
+          type: 'post',
+          data: {id:id},
+          success: function(data){
+            //添加成功后 重新加载页面
+            location.reload();
+          }
+        });
+      });
+
+
+    })
   </script>
 </body>
 
